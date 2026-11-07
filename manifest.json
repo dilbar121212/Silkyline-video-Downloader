@@ -1,0 +1,26 @@
+{
+  "id": "com.silkyline.downloader",
+  "name": "Silkyline Video Downloader",
+  "short_name": "Silkyline",
+  "description": "Fast & free HD video and MP3 downloader for TikTok, Instagram, Facebook, YouTube & Pinterest.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07423e",
+  "theme_color": "#07423e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/pwa-builder/PWABuilder/main/assets/new_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2989/2989976.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
