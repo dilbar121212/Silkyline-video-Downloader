@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Silkyline Video Downloader</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./silkyline-logo.jpg" />
+  <link rel="apple-touch-icon" href="./silkyline-logo.jpg" />
+  <meta name="theme-color" content="#07423e" />
+  <link href="https://fonts.googleapis.com/css2?family=Rozha+One&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --cream: #fff6e0;
+      --ink: #17130b;
+      --dim: #5c5546;
+      --gold: #c99700;
+      --truck-pink: #e91e63;
+      --marigold: #ff9f1c;
+      --leaf: #1fa84b;
+      --peacock-blue: #1663c7;
+      --signal-red: #d92323;
+    }
+    body { background-color: #07423e; color: #17130b; margin: 0; font-family: system-ui, sans-serif; }
+    .font-display { font-family: "Rozha One", Georgia, serif; }
+    .painted-panel {
+      background: var(--cream);
+      color: var(--ink);
+      border: 3px solid var(--ink);
+      border-radius: 10px;
+      box-shadow: 0 0 0 2px var(--cream), 0 0 0 4px var(--gold), 0 0 0 6px var(--ink), 0 0 0 8px var(--signal-red), 0 14px 28px rgba(0,0,0,0.4);
+    }
+    .diamond-strip {
+      height: 12px;
+      background-image: repeating-linear-gradient(45deg, var(--truck-pink) 0 10px, var(--gold) 10px 20px, var(--leaf) 20px 30px, var(--peacock-blue) 30px 40px, var(--marigold) 40px 50px, var(--signal-red) 50px 60px);
+      border-top: 2px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+    }
+    @keyframes pulse-dot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.5; } }
+    .live-dot { animation: pulse-dot 1.5s infinite; }
+  </style>
+</head>
+<body id="app-body" class="min-h-screen pb-12 transition-colors duration-300">
+  <main class="mx-auto w-full max-w-md px-4">
+    <!-- Top Language & Theme Controls -->
+    <div class="pt-3 flex flex-wrap items-center justify-between gap-2">
+      <div class="inline-flex rounded-full border-2 border-black bg-[#fff6e0] p-0.5 shadow">
+        <button onclick="setLang('en')" id="lang-en" class="rounded-full px-2.5 py-1 text-xs font-bold text-black">EN</button>
+        <button onclick="setLang('ro')" id="lang-ro" class="rounded-full px-2.5 py-1 text-xs font-bold bg-[#d92323] text-white">Roman</button>
+        <button onclick="setLang('ur')" id="lang-ur" class="rounded-full px-2.5 py-1 text-xs font-bold text-black">اردو</button>
+      </div>
+      <div class="inline-flex rounded-full border-2 border-black bg-[#fff6e0] p-0.5 shadow">
+        <button onclick="setTheme('teal')" id="th-teal" class="rounded-full px-2.5 py-1 text-xs font-bold bg-[#17130b] text-[#ffe9b8]">Teal Art</button>
+        <button onclick="setTheme('royal')" id="th-royal" class="rounded-full px-2.5 py-1 text-xs font-bold text-black">Royal Blue</button>
+        <button onclick="setTheme('dark')" id="th-dark" class="rounded-full px-2.5 py-1 text-xs font-bold text-black">Dark Gold</button>
+      </div>
+    </div>
+
+    <!-- Silkyline Logo -->
+    <div class="mt-3 overflow-hidden rounded-[10px] border-[3px] border-black shadow-xl bg-black">
+      <img src="./silkyline-logo.jpg" alt="Silkyline Logo" class="h-64 w-full object-cover object-center" />
+    </div>
+
+    <!-- Subtitle under logo -->
+    <h1 class="mt-3 text-center">
+      <span id="txt-subtitle" class="font-display block text-2xl font-bold tracking-wide text-[#ffe9b8]">video downloader</span>
+    </h1>
+    <p id="txt-tagline" class="mt-1 text-center text-sm text-[#cfe8df]">Link paste karein aur seedha apne phone mein video save karein.</p>
+
+    <!-- NEW: Silkyline Live Widget Counter -->
+    <div class="mt-4 grid grid-cols-3 gap-2">
+      <div class="rounded-lg border-2 border-black bg-[#fff6e0] p-2 text-center shadow-[0_3px_0_rgb(0,0,0,0.6)]">
+        <span class="block text-[10px] font-bold uppercase tracking-wider text-[#5c5546]" id="lbl-cnt-total">Total Saved</span>
+        <span id="cnt-global" class="font-display text-lg font-bold text-[#d92323]">14,820</span>
+      </div>
+      <div class="rounded-lg border-2 border-black bg-[#fff6e0] p-2 text-center shadow-[0_3px_0_rgb(0,0,0,0.6)]">
+        <span class="block text-[10px] font-bold uppercase tracking-wider text-[#5c5546]" id="lbl-cnt-mine">My Videos</span>
+        <span id="cnt-user" class="font-display text-lg font-bold text-[#1fa84b]">0</span>
+      </div>
+      <div class="rounded-lg border-2 border-black bg-[#fff6e0] p-2 text-center shadow-[0_3px_0_rgb(0,0,0,0.6)]">
+        <span class="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#5c5546]">
+          <span class="live-dot inline-block h-2 w-2 rounded-full bg-[#1fa84b]"></span>
+          <span id="lbl-cnt-limit">Max Limit</span>
+        </span>
+        <span class="font-display text-lg font-bold text-[#1663c7]">700 MB</span>
+      </div>
+    </div>
+
+    <!-- Platform Pills -->
+    <ul class="mt-4 flex flex-wrap justify-center gap-2">
+      <li class="rounded-full border-2 border-black px-3 py-1 text-xs font-bold bg-[#17130b] text-white">TikTok</li>
+      <li class="rounded-full border-2 border-black px-3 py-1 text-xs font-bold bg-[#e1306c] text-white">Instagram</li>
+      <li class="rounded-full border-2 border-black px-3 py-1 text-xs font-bold bg-[#1663c7] text-white">Facebook</li>
+      <li class="rounded-full border-2 border-black px-3 py-1 text-xs font-bold bg-[#d92323] text-white">YouTube</li>
+      <li class="rounded-full border-2 border-black px-3 py-1 text-xs font-bold bg-[#ad0025] text-white">Pinterest</li>
+    </ul>
+
+    <!-- Paste Panel -->
+    <section class="painted-panel mt-6">
+      <div class="diamond-strip rounded-t-[7px]"></div>
+      <div class="p-4">
+        <label id="txt-pastelabel" class="font-display text-lg">Video ka link yahan paste karein</label>
+        <textarea id="url-input" dir="ltr" placeholder="https://www.tiktok.com/…" rows="2" class="mt-2 w-full resize-none rounded-md border-2 border-black bg-white p-3 text-base text-black"></textarea>
+        <div class="mt-3 flex gap-2">
+          <button onclick="pasteClip()" id="txt-pastebtn" class="flex-1 rounded-md border-2 border-black bg-[#ff9f1c] px-3 py-3 font-bold text-black shadow-[0_3px_0_rgb(0,0,0,0.7)] active:translate-y-[2px]">Paste</button>
+          <button onclick="getVideo()" id="btn-getvideo" class="flex-[2] rounded-md border-2 border-black bg-[#d92323] px-3 py-3 font-bold text-white shadow-[0_3px_0_rgb(0,0,0,0.7)] active:translate-y-[2px]">Video Laye</button>
+        </div>
+        <p id="txt-limit" class="mt-3 text-sm text-[#5c5546]">700 MB tak ki public videos kaam karti hain. Private videos download nahi ho saktin.</p>
+      </div>
+      <div class="diamond-strip rounded-b-[7px]"></div>
+    </section>
+
+    <!-- Error Panel -->
+    <section id="error-panel" class="painted-panel mt-6 p-4 hidden">
+      <h2 class="font-display text-lg text-[#d92323]">Masla aa gaya</h2>
+      <p id="error-msg" class="mt-1 text-base"></p>
+    </section>
+
+    <!-- Preview & Choices Panel -->
+    <section id="preview-panel" class="painted-panel mt-6 hidden">
+      <div class="diamond-strip rounded-t-[7px]"></div>
+      <div class="p-4">
+        <img id="preview-thumb" src="" class="w-full rounded-md border-2 border-black object-cover max-h-56 hidden" />
+        <h2 id="preview-title" class="mt-3 text-lg font-bold"></h2>
+        <h3 id="txt-choose" class="font-display mt-4 text-base">Apni pasand ki quality chunein</h3>
+        <div class="mt-2 flex flex-col gap-2">
+          <button onclick="downloadChoice('best')" class="rounded-md border-2 border-black px-4 py-3 text-left text-white bg-[#1fa84b] shadow-[0_3px_0_rgb(0,0,0,0.7)]">
+            <span id="txt-best" class="block text-base font-bold">Best Quality (HD)</span>
+            <span class="block text-sm opacity-90">Sab se saaf video, bari file</span>
+          </button>
+          <button onclick="downloadChoice('smaller')" class="rounded-md border-2 border-black px-4 py-3 text-left text-white bg-[#1663c7] shadow-[0_3px_0_rgb(0,0,0,0.7)]">
+            <span id="txt-smaller" class="block text-base font-bold">Choti File (Data Saver)</span>
+            <span class="block text-sm opacity-90">Kam MBs — internet aur space bachaye</span>
+          </button>
+          <button onclick="downloadChoice('audio')" class="rounded-md border-2 border-black px-4 py-3 text-left text-white bg-[#ff9f1c] shadow-[0_3px_0_rgb(0,0,0,0.7)]">
+            <span id="txt-audio" class="block text-base font-bold">Sirf Audio (MP3)</span>
+            <span class="block text-sm opacity-90">Sirf aawaz / gaana MP3 format mein</span>
+          </button>
+        </div>
+      </div>
+      <div class="diamond-strip rounded-b-[7px]"></div>
+    </section>
+
+    <!-- Save Panel -->
+    <section id="save-panel" class="painted-panel mt-6 hidden">
+      <div class="diamond-strip rounded-t-[7px]"></div>
+      <div class="p-4">
+        <h2 class="font-display text-xl">Aap ki file tayyar hai!</h2>
+        <p id="save-filename" class="mt-1 text-sm text-[#5c5546]"></p>
+        <div id="media-container" class="mt-3"></div>
+        <a id="save-link" href="#" target="_blank" rel="noreferrer" download class="mt-4 flex items-center justify-center rounded-md border-2 border-black bg-[#d92323] px-4 py-4 text-lg font-bold text-white shadow-[0_4px_0_rgb(0,0,0,0.7)]">
+          Device mein Save karne ke liye dabayein
+        </a>
+        <button onclick="resetApp()" class="mt-3 w-full rounded-md border-2 border-black bg-[#1fa84b] px-3 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_rgb(0,0,0,0.7)]">
+          Dusri video
+        </button>
+      </div>
+      <div class="diamond-strip rounded-b-[7px]"></div>
+    </section>
+
+    <!-- History Panel -->
+    <section class="painted-panel mt-6">
+      <div class="diamond-strip rounded-t-[7px]"></div>
+      <div class="p-4">
+        <div class="flex items-center justify-between">
+          <h2 id="txt-history" class="font-display text-lg">Purani Downloads (History)</h2>
+          <button onclick="clearHistory()" class="rounded border-2 border-black bg-[#d92323] px-2.5 py-1 text-xs font-bold text-white">Clear</button>
+        </div>
+        <div id="history-list" class="mt-3 flex flex-col gap-2 text-sm text-[#5c5546]">Abhi tak koi video download nahi ki gayi.</div>
+      </div>
+      <div class="diamond-strip rounded-b-[7px]"></div>
+    </section>
+
+    <p class="mt-6 text-center text-xs text-[#cfe8df]">For public videos you have the right to save. Please respect the creators' copyright.</p>
+  </main>
+
+  <script>
+    let currentInfo = null;
+    const THEMES = {
+      teal: { bg: "#07423e", head: "#ffe9b8", sub: "#cfe8df" },
+      royal: { bg: "#0f2557", head: "#ffd166", sub: "#dbe7ff" },
+      dark: { bg: "#14120e", head: "#ffbe0b", sub: "#e5dec9" }
+    };
+    const LANGS = {
+      en: { sub: "video downloader", tag: "One link in, one video out — saved on your own device.", label: "Paste the video link", get: "Get video", limit: "Works with public videos up to 700 MB.", hist: "Recent Downloads", cTotal: "Total Saved", cMine: "My Videos", cLim: "Max Limit" },
+      ro: { sub: "video downloader", tag: "Link paste karein aur seedha apne phone mein video save karein.", label: "Video ka link yahan paste karein", get: "Video Laye", limit: "700 MB tak ki public videos kaam karti hain.", hist: "Purani Downloads (History)", cTotal: "Kul Downloads", cMine: "Meri Videos", cLim: " Bari Limit" },
+      ur: { sub: "ویڈیو ڈاؤن لوڈر", tag: "لنک پیسٹ کریں اور ویڈیو سیدھا اپنے فون میں محفوظ کریں۔", label: "ویڈیو کا لنک یہاں پیسٹ کریں", get: "ویڈیو حاصل کریں", limit: "700 MB تک کی پبلک ویڈیوز ڈاؤن لوڈ ہو سکتی ہیں۔", hist: "حالیہ ڈاؤن لوڈز (History)", cTotal: "کل ڈاؤن لوڈز", cMine: "میری ویڈیوز", cLim: "فائل لمٹ" }
+    };
+
+    function updateCounters() {
+      const h = JSON.parse(localStorage.getItem("silky_hist") || "[]");
+      const userCount = Number(localStorage.getItem("silky_total_cnt") || h.length);
+      const baseGlobal = 14820 + userCount;
+      document.getElementById("cnt-user").innerText = userCount.toLocaleString();
+      document.getElementById("cnt-global").innerText = baseGlobal.toLocaleString();
+    }
+
+    function setTheme(id) {
+      const t = THEMES[id];
+      document.getElementById("app-body").style.backgroundColor = t.bg;
+      document.getElementById("txt-subtitle").style.color = t.head;
+      document.getElementById("txt-tagline").style.color = t.sub;
+      ["teal","royal","dark"].forEach(k => {
+        document.getElementById("th-"+k).className = k === id
+          ? "rounded-full px-2.5 py-1 text-xs font-bold bg-[#17130b] text-[#ffe9b8]"
+          : "rounded-full px-2.5 py-1 text-xs font-bold text-black";
+      });
+    }
+
+    function setLang(id) {
+      const l = LANGS[id];
+      document.getElementById("txt-subtitle").innerText = l.sub;
+      document.getElementById("txt-tagline").innerText = l.tag;
+      document.getElementById("txt-pastelabel").innerText = l.label;
+      document.getElementById("btn-getvideo").innerText = l.get;
+      document.getElementById("txt-limit").innerText = l.limit;
+      document.getElementById("txt-history").innerText = l.hist;
+      document.getElementById("lbl-cnt-total").innerText = l.cTotal;
+      document.getElementById("lbl-cnt-mine").innerText = l.cMine;
+      document.getElementById("lbl-cnt-limit").innerText = l.cLim;
+      ["en","ro","ur"].forEach(k => {
+        document.getElementById("lang-"+k).className = k === id
+          ? "rounded-full px-2.5 py-1 text-xs font-bold bg-[#d92323] text-white"
+          : "rounded-full px-2.5 py-1 text-xs font-bold text-black";
+      });
+    }
+
+    async function pasteClip() {
+      try { document.getElementById("url-input").value = await navigator.clipboard.readText(); } catch {}
+    }
+
+    function showError(msg) {
+      const p = document.getElementById("error-panel");
+      document.getElementById("error-msg").innerText = msg;
+      p.classList.remove("hidden");
+    }
+
+    async function getVideo() {
+      const url = document.getElementById("url-input").value.trim();
+      document.getElementById("error-panel").classList.add("hidden");
+      document.getElementById("preview-panel").classList.add("hidden");
+      document.getElementById("save-panel").classList.add("hidden");
+      if (!url) return showError("Pehle video ka link paste karein!");
+
+      const btn = document.getElementById("btn-getvideo");
+      btn.innerText = "Talash jari...";
+      currentInfo = null;
+      try {
+        if (url.includes("tiktok.com")) {
+          const r = await fetch("https://www.tikwm.com/api/?url=" + encodeURIComponent(url) + "&hd=1").then(x => x.json());
+          if (r && r.code === 0 && r.data) {
+            currentInfo = {
+              title: r.data.title || "TikTok Video",
+              thumb: r.data.cover,
+              streams: { best: r.data.hdplay || r.data.play, smaller: r.data.wmplay || r.data.play, audio: r.data.music }
+            };
+          }
+        }
+        if (!currentInfo) {
+          currentInfo = { title: "Video Ready", thumb: null, streams: null, rawUrl: url };
+          try {
+            const oe = await fetch("https://noembed.com/embed?url=" + encodeURIComponent(url)).then(x => x.json());
+            if (oe && oe.title) currentInfo.title = oe.title;
+            if (oe && oe.thumbnail_url) currentInfo.thumb = oe.thumbnail_url;
+          } catch {}
+        }
+        document.getElementById("preview-title").innerText = currentInfo.title;
+        const th = document.getElementById("preview-thumb");
+        if (currentInfo.thumb) { th.src = currentInfo.thumb; th.classList.remove("hidden"); }
+        else { th.classList.add("hidden"); }
+        document.getElementById("preview-panel").classList.remove("hidden");
+      } catch {
+        showError("Video fetch nahi ho saki. Link check karein.");
+      }
+      btn.innerText = "Video Laye";
+    }
+
+    function downloadChoice(choice) {
+      const url = document.getElementById("url-input").value.trim();
+      const ext = choice === "audio" ? "mp3" : "mp4";
+      const fname = "silkyline_" + Date.now() + "." + ext;
+      document.getElementById("save-filename").innerText = (currentInfo?.title || "Video") + " (" + choice.toUpperCase() + ")";
+      const container = document.getElementById("media-container");
+      const link = document.getElementById("save-link");
+
+      let fileUrl = "";
+      if (currentInfo && currentInfo.streams && currentInfo.streams[choice]) {
+        fileUrl = currentInfo.streams[choice];
+        container.innerHTML = choice === "audio"
+          ? `<audio src="${fileUrl}" controls class="w-full"></audio>`
+          : `<video src="${fileUrl}" controls playsinline class="w-full rounded-md border-2 border-black bg-black"></video>`;
+      } else {
+        const fmt = choice === "audio" ? "mp3" : choice === "smaller" ? "480" : "1080";
+        fileUrl = "https://loader.to/api/button/?url=" + encodeURIComponent(url) + "&f=" + fmt;
+        container.innerHTML = `<iframe src="${fileUrl}" class="w-full h-20 rounded-md border-2 border-black bg-white"></iframe>`;
+      }
+      link.href = fileUrl;
+      link.download = fname;
+      document.getElementById("preview-panel").classList.add("hidden");
+      document.getElementById("save-panel").classList.remove("hidden");
+
+      const prevCnt = Number(localStorage.getItem("silky_total_cnt") || 0) + 1;
+      localStorage.setItem("silky_total_cnt", String(prevCnt));
+      saveHistory({ title: currentInfo?.title || "Video", choice, url: fileUrl });
+      updateCounters();
+    }
+
+    function resetApp() {
+      document.getElementById("url-input").value = "";
+      currentInfo = null;
+      document.getElementById("save-panel").classList.add("hidden");
+      document.getElementById("preview-panel").classList.add("hidden");
+    }
+
+    function saveHistory(item) {
+      let h = JSON.parse(localStorage.getItem("silky_hist") || "[]");
+      h.unshift(item);
+      localStorage.setItem("silky_hist", JSON.stringify(h.slice(0, 20)));
+      renderHistory();
+    }
+
+    function clearHistory() {
+      localStorage.removeItem("silky_hist");
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const h = JSON.parse(localStorage.getItem("silky_hist") || "[]");
+      const box = document.getElementById("history-list");
+      if (h.length === 0) { box.innerHTML = "Abhi tak koi video download nahi ki gayi."; return; }
+      box.innerHTML = h.map(x => `
+        <div class="rounded-md border-2 border-black bg-white p-2.5 flex items-center justify-between gap-2">
+          <div class="truncate"><b class="text-black">${x.title}</b> <span class="text-xs">(${x.choice})</span></div>
+          <a href="${x.url}" target="_blank" class="shrink-0 rounded border border-black bg-[#1fa84b] px-2.5 py-1 text-xs font-bold text-white">Save</a>
+        </div>
+      `).join("");
+    }
+
+    renderHistory();
+    updateCounters();
+  </script>
+</body>
+          </html>
