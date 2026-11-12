@@ -1,15 +1,22 @@
 {
-  "id": "com.silkyline.downloader",
+  "id": "com.dilbar.silkyline.saver",
   "name": "Silkyline Video Downloader",
   "short_name": "Silkyline",
-  "description": "Fast & free HD video and MP3 downloader for TikTok, Instagram, Facebook, YouTube & Pinterest.",
+  "version": "2.0",
+  "description": "Paste any link to save videos directly on your device. Supports TikTok, Instagram, Facebook, YouTube & Pinterest up to 700 MB.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#07423e",
-  "theme_color": "#07423e",
+  "background_color": "#06302b",
+  "theme_color": "#06302b",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "./silkyline-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
     {
       "src": "https://raw.githubusercontent.com/pwa-builder/PWABuilder/main/assets/new_logo.png",
       "sizes": "512x512",
