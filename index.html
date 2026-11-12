@@ -34,17 +34,35 @@
       <span id="s3" class="rounded-full border px-2.5 py-1 bg-[#fdf8ec]">3. Save file</span>
     </div>
 
-    <div id="app-box"></div>
+    <!-- MAIN VIDEO DOWNLOADER BOX (Built-in, never disappears!) -->
+    <section class="panel mt-6">
+      <div class="strip"></div>
+      <div class="p-4">
+        <label class="font-display text-lg">Paste any link here...</label>
+        <textarea id="inp" placeholder="Paste your video link here..." rows="2" class="mt-2 w-full rounded-md border border-black/45 bg-white p-3 text-base text-black"></textarea>
+        <div class="mt-3 flex gap-2">
+          <button type="button" onclick="pasteIt()" class="flex-1 rounded-md border border-black/45 bg-[#e39a2d] py-3 font-bold text-black shadow">Paste</button>
+          <button type="button" id="gbtn" onclick="fetchIt()" class="flex-[2] rounded-md border border-black/45 bg-[#c1272d] py-3 font-bold text-white shadow">Get video</button>
+        </div>
+        <p class="mt-3 text-xs text-[#59523f]">Works with public videos up to 700 MB. Private or login-only videos can't be fetched.</p>
+      </div>
+      <div class="strip"></div>
+    </section>
 
+    <!-- Dynamic Preview / Save / History Area -->
+    <div id="result-box"></div>
+    <div id="hist-box"></div>
+
+    <!-- Customer Support -->
     <section class="panel mt-6">
       <div class="strip"></div>
       <div class="p-4">
         <h2 class="font-display text-lg">Customer Support</h2>
         <p class="mt-1 text-sm text-[#59523f]">Questions or help with a download? Reach us here:</p>
         <div class="mt-3 flex flex-col gap-2 text-sm">
-          <a href="mailto:silkylineai@gmail.com" class="block rounded-md border bg-white p-2.5"><b>Email:</b> Silkylineai@gmail.com</a>
-          <a href="https://youtube.com/@silkylineai" target="_blank" class="block rounded-md border bg-white p-2.5"><b>YouTube Channel:</b> @silkylineai</a>
-          <a href="https://www.facebook.com/share/1CNZ5b6YH6/" target="_blank" class="block rounded-md border bg-white p-2.5"><b>Facebook Page:</b> Visit our page on Facebook</a>
+          <a href="mailto:silkylineai@gmail.com" class="block rounded-md border border-black/45 bg-white p-2.5"><b>Email:</b> Silkylineai@gmail.com</a>
+          <a href="https://youtube.com/@silkylineai" target="_blank" class="block rounded-md border border-black/45 bg-white p-2.5"><b>YouTube Channel:</b> @silkylineai</a>
+          <a href="https://www.facebook.com/share/1CNZ5b6YH6/" target="_blank" class="block rounded-md border border-black/45 bg-white p-2.5"><b>Facebook Page:</b> Visit our page on Facebook</a>
         </div>
       </div>
       <div class="strip"></div>
@@ -55,6 +73,62 @@
       <p class="mt-1">For public videos you have the right to save. Please respect copyright.</p>
     </footer>
   </main>
-  <script src="./app.js"></script>
+
+  <script>
+    let cur = null;
+    const rbox = document.getElementById("result-box");
+    function setStep(n) {
+      [1,2,3].forEach(i => document.getElementById("s"+i).className = "rounded-full border px-2.5 py-1 " + (n===i ? "bg-[#c1272d] text-white" : n>i ? "bg-[#2e8b62] text-white" : "bg-[#fdf8ec] text-black"));
+    }
+    async function pasteIt() {
+      try { document.getElementById("inp").value = await navigator.clipboard.readText(); } catch {}
+    }
+    async function fetchIt() {
+      const u = document.getElementById("inp").value.trim();
+      if (!u) { rbox.innerHTML = `<section class="panel mt-4 p-4"><b class="text-[#c1272d]">Paste a video link first!</b></section>`; return; }
+      const btn = document.getElementById("gbtn"); btn.innerText = "Fetching...";
+      cur = { url: u, title: "Video Ready", thumb: "", streams: null };
+      try {
+        if (u.includes("tiktok.com")) {
+          const r = await fetch("https://www.tikwm.com/api/?url=" + encodeURIComponent(u) + "&hd=1").then(x => x.json());
+          if (r?.data) cur = { url: u, title: r.data.title || "TikTok Video", thumb: r.data.cover, streams: { best: r.data.hdplay || r.data.play, smaller: r.data.wmplay || r.data.play, audio: r.data.music } };
+        } else {
+          const oe = await fetch("https://noembed.com/embed?url=" + encodeURIComponent(u)).then(x => x.json());
+          if (oe?.title) cur.title = oe.title; if (oe?.thumbnail_url) cur.thumb = oe.thumbnail_url;
+        }
+      } catch {}
+      btn.innerText = "Get video"; setStep(2);
+      rbox.innerHTML = `<section class="panel mt-6"><div class="strip"></div><div class="p-4">
+        ${cur.thumb ? `<img src="${cur.thumb}" class="w-full rounded-md border max-h-56 object-cover mb-3"/>` : ""}
+        <h2 class="font-bold text-lg">${cur.title}</h2>
+        <h3 class="font-display mt-3 text-base">Choose your download</h3>
+        <div class="mt-2 flex flex-col gap-2">
+          <button onclick="dl('best')" class="rounded-md border p-3 text-left text-white bg-[#2e8b62]"><b>Best quality</b><br><span class="text-xs">Sharpest picture, biggest file</span></button>
+          <button onclick="dl('smaller')" class="rounded-md border p-3 text-left text-white bg-[#2f6da8]"><b>Smaller file</b><br><span class="text-xs">Lower picture size saves space and data</span></button>
+          <button onclick="dl('audio')" class="rounded-md border p-3 text-left text-white bg-[#e39a2d]"><b>Audio only (MP3)</b><br><span class="text-xs">Just the sound, as an MP3 file</span></button>
+        </div>
+      </div><div class="strip"></div></section>`;
+    }
+    function dl(c) {
+      setStep(3);
+      let f = cur.streams?.[c] || ("https://loader.to/api/button/?url=" + encodeURIComponent(cur.url) + "&f=" + (c==="audio"?"mp3":c==="smaller"?"480":"1080"));
+      let h = JSON.parse(localStorage.getItem("silky_h") || "[]");
+      h.unshift({ t: cur.title, c: c.toUpperCase(), u: f });
+      localStorage.setItem("silky_h", JSON.stringify(h.slice(0, 15))); renderH();
+      rbox.innerHTML = `<section class="panel mt-6"><div class="strip"></div><div class="p-4">
+        <h2 class="font-display text-xl">Your file is ready</h2>
+        ${cur.streams?.[c] ? (c==="audio" ? `<audio src="${f}" controls class="w-full mt-3"></audio>` : `<video src="${f}" controls playsinline class="w-full rounded border bg-black mt-3"></video>`) : `<iframe src="${f}" class="w-full h-20 rounded border bg-white mt-3"></iframe>`}
+        <a href="${f}" target="_blank" download class="mt-4 block text-center rounded-md border bg-[#c1272d] py-4 text-lg font-bold text-white">Tap to save to your device</a>
+      </div><div class="strip"></div></section>`;
+    }
+    function renderH() {
+      const h = JSON.parse(localStorage.getItem("silky_h") || "[]");
+      document.getElementById("hist-box").innerHTML = h.length ? `<section class="panel mt-6"><div class="strip"></div><div class="p-4">
+        <div class="flex justify-between items-center"><h2 class="font-display text-lg">Your downloads</h2><span class="rounded-full border bg-[#e39a2d] px-2 py-0.5 text-xs font-bold">New in v2</span></div>
+        <div class="mt-3 flex flex-col gap-2">${h.map(x => `<div class="rounded border bg-white p-2.5"><b class="text-sm block">${x.t}</b><span class="text-xs text-gray-600">${x.c}</span><br><a href="${x.u}" target="_blank" download class="mt-1 inline-block rounded bg-[#2e8b62] px-3 py-1 text-xs font-bold text-white">Save again</a></div>`).join("")}</div>
+      </div><div class="strip"></div></section>` : "";
+    }
+    renderH();
+  </script>
 </body>
 </html>
